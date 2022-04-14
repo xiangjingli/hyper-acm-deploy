@@ -1,2 +1,2 @@
 # hyper-acm-deploy
-a experiment to deploy acm alongside hypershift control-plane
+Deploy ACM components on Hypershift hosted cluster

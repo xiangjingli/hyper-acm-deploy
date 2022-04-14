@@ -4,6 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: managedcluster-import-controller
+  namespace: <HOSTED_CLUSTER>
   labels:
     app: managedcluster-import-controller
 spec:
@@ -19,7 +20,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: managedcluster-import-controller
-        image: quay.io/haoliu/managedcluster-import-controller:hyper-acm-hack
+        image: <MANAGED_CLUSTER_IMPORT>
         imagePullPolicy: Always
         volumeMounts:
         - mountPath: /var/run/secrets/hypershift
@@ -36,13 +37,13 @@ spec:
         - name: OPERATOR_NAME
           value: "managedcluster-import-controller"
         - name: REGISTRATION_OPERATOR_IMAGE
-          value: "quay.io/open-cluster-management/registration-operator:latest"
+          value: <REGISTRATION_OPERATOR>
         - name: REGISTRATION_IMAGE
-          value: "quay.io/open-cluster-management/registration:latest"
+          value: <HUB_REGISTRATION>
         - name: WORK_IMAGE
-          value: "quay.io/open-cluster-management/work:latest"
+          value: <MANIFEST_WORK>
         - name: DEFAULT_IMAGE_REGISTRY
-          value: quay.io/open-cluster-management
+          value: quay.io/stolostron
         - name: DEFAULT_IMAGE_PULL_SECRET
           value: pull-secret
         - name: POD_NAMESPACE
