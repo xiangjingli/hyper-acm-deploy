@@ -54,20 +54,23 @@ fi
 comment "info" "3. Uninstalling ACM App component"
 
 export KUBECONFIG=./hub.kubeconfig
-oc delete deployments -n ${HOSTED_CLUSTER} multicluster-operators-channel multicluster-operators-hub-subscription multicluster-operators-application multicluster-operators-subscription-report konnectivity-agent-webhook
+oc delete deployments -n ${HOSTED_CLUSTER} multicluster-operators-channel multicluster-operators-hub-subscription multicluster-operators-application multicluster-operators-subscription-report konnectivity-agent-webhook --ignore-not-found
 
-oc delete services -n ${HOSTED_CLUSTER} channels-apps-open-cluster-management-webhook-svc
+oc delete services -n ${HOSTED_CLUSTER} channels-apps-open-cluster-management-webhook-svc --ignore-not-found
 
 export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
 
-oc delete endpoints -n ${HOSTED_CLUSTER} channels-apps-open-cluster-management-webhook-svc
+oc delete endpoints -n ${HOSTED_CLUSTER} channels-apps-open-cluster-management-webhook-svc --ignore-not-found
 
-oc delete services -n ${HOSTED_CLUSTER} channels-apps-open-cluster-management-webhook-svc
+oc delete services -n ${HOSTED_CLUSTER} channels-apps-open-cluster-management-webhook-svc --ignore-not-found
 
 
 comment "info" "4. Uninstalling ACM Policy component"
 
+export KUBECONFIG=./hub.kubeconfig
 
+oc delete -f policy/management/policy-propagator.yaml -n ${HOSTED_CLUSTER} --ignore-not-found 
+oc delete -f policy/management/policy-addon-controller.yaml -n ${HOSTED_CLUSTER} --ignore-not-found 
 
 
 comment "info" "5. Uninstalling ACM Observability component"

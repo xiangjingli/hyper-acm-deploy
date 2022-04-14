@@ -59,8 +59,8 @@ oc config view --minify=true --raw=true > hub.kubeconfig
 export KUBECONFIG=./hub.kubeconfig
 oc cluster-info
 if [ $? -ne 0 ]; then
-    comment "error" "Failed to access the management cluster."
-    exit 1
+  comment "error" "Failed to access the management cluster."
+  exit 1
 fi
 
 HOSTED_CLUSTER="${CLUSTER_NAMESPACE}-${CLUSTER_NAME}"
@@ -73,10 +73,9 @@ oc get secret -n ${CLUSTER_NAMESPACE} ${HOSTED_CLUSTER_KUBECONFIG} -o jsonpath={
 export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
 oc cluster-info
 if [ $? -ne 0 ]; then
-    comment "error" "Failed to access the hosted cluster."
-    exit 1
+  comment "error" "Failed to access the hosted cluster."
+  exit 1
 fi
-
 
 comment "info" "3. Installing ACM foundation component"
 
@@ -106,52 +105,83 @@ sed -e "s,\<MANAGED_CLUSTER_IMPORT\>,${MANAGED_CLUSTER_IMPORT},"  -e "s,\<HOSTED
 
 sed -e "s,\<PLACEMENT\>,${PLACEMENT}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," foundation/management/03-placement-deployment.yaml | oc apply -f -
 
+if [ "${APP}" = "true" ]; then
+  comment "info" "4. Installing ACM App component"
 
-comment "info" "4. Installing ACM App component"
+  comment "info" "4.1 Applying App component CRDs on the hosted cluster"
 
-comment "info" "4.1 Applying App component CRDs on the hosted cluster"
+  export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
+  oc apply -f app/hosted/crds
 
-export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
-oc apply -f app/hosted/crds
+  comment "info" "4.2 Applying App components on the management cluster"
 
-comment "info" "4.2 Applying App components on the management cluster"
+  export KUBECONFIG=./hub.kubeconfig
 
-export KUBECONFIG=./hub.kubeconfig
+  cfg.section.APP_IMAGES
 
-cfg.section.APP_IMAGES
+  sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/1-service_account.yaml | oc apply -f -
+  oc apply -f app/management/2-clusterrole.yaml
+  sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/3-clusterrole_binding.yaml | oc apply -f -
 
-sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/1-service_account.yaml | oc apply -f -
-oc apply -f app/management/2-clusterrole.yaml
-sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/3-clusterrole_binding.yaml | oc apply -f -
+  sed -e "s,\<CHANNEL\>,${CHANNEL}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/4-channel-deployment.yaml | oc apply -f -
 
-sed -e "s,\<CHANNEL\>,${CHANNEL}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/4-channel-deployment.yaml | oc apply -f -
+  comment "info" "4.3 waiting for app channel pod to be Ready"
+  waitForRes "pods" "multicluster-operators-channel" "${HOSTED_CLUSTER}" ""
 
-comment "info" "4.3 waiting for app channel pod to be Ready"
-waitForRes "pods" "multicluster-operators-channel" "${HOSTED_CLUSTER}" ""
+  sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/5-channel-service.yaml | oc apply -f -
 
-sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/5-channel-service.yaml | oc apply -f -
+  CHANNEL_CLUSTER_IP=`oc get service -n ${HOSTED_CLUSTER} channels-apps-open-cluster-management-webhook-svc -o jsonpath='{.spec.clusterIP}'`
+  comment "info" "CHANNEL_CLUSTER_IP=${CHANNEL_CLUSTER_IP}"
 
-CHANNEL_CLUSTER_IP=`oc get service -n ${HOSTED_CLUSTER} channels-apps-open-cluster-management-webhook-svc -o jsonpath='{.spec.clusterIP}'`
-comment "info" "CHANNEL_CLUSTER_IP=${CHANNEL_CLUSTER_IP}"
-
-if [ -z "${CHANNEL_CLUSTER_IP}" ]; then
+  if [ -z "${CHANNEL_CLUSTER_IP}" ]; then
     comment "error" "Failed to get the cluster ip of the app channel pod."
     exit 1
+  fi
+
+  sed -e "s,\<SUBSCRIPTION\>,${SUBSCRIPTION}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/6-hub-subscription-deployment.yaml | oc apply -f -
+  sed -e "s,\<SUBSCRIPTION\>,${SUBSCRIPTION}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/7-application-deployment.yaml | oc apply -f -
+  sed -e "s,\<SUBSCRIPTION\>,${SUBSCRIPTION}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/8-subscription-report-deployment.yaml | oc apply -f -
+  sed -e "s,\<CHANNEL_CLUSTER_IP\>,${CHANNEL_CLUSTER_IP}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/9-konnectivity-agent-webhook-deployment.yaml | oc apply -f -
+
+  comment "info" "4.3 Applying channel webhook service and endpoint on the hosted cluster"
+
+  export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
+
+  sed -e "s,\<CHANNEL_CLUSTER_IP\>,${CHANNEL_CLUSTER_IP}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/hosted/1-channel-webhook-service.yaml | oc apply -f -
+
 fi
 
-sed -e "s,\<SUBSCRIPTION\>,${SUBSCRIPTION}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/6-hub-subscription-deployment.yaml | oc apply -f -
-sed -e "s,\<SUBSCRIPTION\>,${SUBSCRIPTION}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/7-application-deployment.yaml | oc apply -f -
-sed -e "s,\<SUBSCRIPTION\>,${SUBSCRIPTION}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/8-subscription-report-deployment.yaml | oc apply -f -
-sed -e "s,\<CHANNEL_CLUSTER_IP\>,${CHANNEL_CLUSTER_IP}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/9-konnectivity-agent-webhook-deployment.yaml | oc apply -f -
-
-comment "info" "4.3 Applying channel webhook service and endpoint on the hosted cluster"
-
-export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
-
-sed -e "s,\<CHANNEL_CLUSTER_IP\>,${CHANNEL_CLUSTER_IP}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/hosted/1-channel-webhook-service.yaml | oc apply -f -
-
-
 comment "info" "5. Installing ACM Policy component"
+
+if [ "${POLICY}" = "true" ]; then
+  comment "info" "4. Installing ACM App component"
+
+  comment "info" "4.1 Deploy policy CRDs on hosted cluster"
+
+  export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
+  oc apply -f policy/hosted/crds
+
+  if [ "${APP}" != "true" ]; then
+
+    comment "info" "4.1.1 Deploy app placementrule CRD on the hosted cluster"
+    oc apply -f app/hosted/crds/apps.open-cluster-management.io_placementrules_crd_v1.yaml
+
+    comment "info" "4.1.2 Deploy App placementrule hub component on the management cluster"
+
+    export KUBECONFIG=hub.kubeconfig
+    
+    sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/1-service_account.yaml | oc apply -f -
+    oc apply -f app/management/2-clusterrole.yaml
+    sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/3-clusterrole_binding.yaml | oc apply -f -
+
+    sed -e "s,\<SUBSCRIPTION\>,${SUBSCRIPTION}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/7-application-deployment.yaml | oc apply -f -
+  fi
+
+  comment "info" "4.2 Deploy policy hub component on the management cluster"
+  export KUBECONFIG=hub.kubeconfig
+  oc apply -f policy/management/policy-propagator.yaml -n ${HOSTED_CLUSTER}
+  oc apply -f policy/management/policy-addon-controller.yaml -n ${HOSTED_CLUSTER}
+fi
 
 
 comment "info" "6. Installing ACM Observability component"

@@ -37,13 +37,14 @@ function import_cluster_usage () {
     echo "import-cluster.sh is to import a managed cluster to the hosted cluster"
     echo ""
     echo "Options:"
+    echo "  -f     Configuration ini file name"
     echo "  -n     Hosted cluster Namespace"
     echo "  -c     Hosted cluster Name"
     echo "  -m     Managed cluster Name"
     echo "  -k     Managed cluster kubeconfig file name"
     echo "  -h     Help"
     echo ""
-    echo "Example: ./import-cluster.sh -n hypershift-clusters -c acm-1 -m cluster1 -k ~/.kube/kubeconfig.kind"
+    echo "Example: ./import-cluster.sh -f acm.conf -n hypershift-clusters -c acm-1 -m cluster1 -k ~/.kube/kubeconfig.kind"
 }
 
 function detach_cluster_usage () {
@@ -109,20 +110,22 @@ cfg_writer ()
     done
 }
 
-waitForNoAppAddon() {
+waitForNoPods() {
     MINUTE=0
+    resNamespace=$1
     while [ true ]; do
         # Wait up to 3min
         if [ $MINUTE -gt 180 ]; then
-            echo "Timeout waiting for app addon removal"
+            echo "Timeout waiting for addons to be removed"
             exit 1
         fi
-        oc get pods -n open-cluster-management-agent-addon |grep application-manager
-        if [ $? -ne 0 ]; then
-            echo "App addon removed"
+        operatorRes=`oc get pods -n ${resNamespace} | wc`
+
+        if [ $? -eq 0 ]; then
+            echo "All pods in the ${resNamespace} namespace removed"
             break
         fi
-        echo "* STATUS: App addon pod still running. Retry in 5 sec"
+        echo "* STATUS: Pods still running in the ${resNamespace} namespace removed. Retry in 5 sec"
         sleep 5
         (( MINUTE = MINUTE + 5 ))
     done

@@ -66,17 +66,21 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-comment "info" "4. Delete app addon from the hosted cluster"
+comment "info" "4. Delete all addons from the hosted cluster"
 
 export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
 
-oc delete managedclusteraddons -n ${MANAGED_CLUSTER_NAME} application-manager
+oc delete managedclusteraddons -n ${MANAGED_CLUSTER_NAME} application-manager --ignore-not-found
 
-comment "info" "4.1 wait for app addon to be removed from the managed cluster"
+oc delete managedclusteraddons -n ${MANAGED_CLUSTER_NAME} config-policy-controller --ignore-not-found
+
+oc delete managedclusteraddons -n ${MANAGED_CLUSTER_NAME} governance-policy-framework --ignore-not-found
+
+comment "info" "4.1 wait for addons to be removed from the managed cluster"
 
 export KUBECONFIG=${MANAGED_KUBECONFIG}
 
-waitForNoAppAddon
+waitForNoPods "open-cluster-management-agent-addon"
 
 comment "info" "5. Delete klusterlet component from the managed cluster"
 
@@ -87,6 +91,7 @@ oc delete deployments -n open-cluster-management-agent klusterlet
 oc delete klusterlet klusterlet --wait=false --ignore-not-found
 oc patch klusterlet klusterlet -p '{"metadata":{"finalizers":null}}' --type=merge
 
+waitForNoPods "open-cluster-management-agent"
 
 oc delete namespace open-cluster-management-agent --wait=false --ignore-not-found
 oc delete namespace open-cluster-management-agent-addon --wait=false --ignore-not-found
@@ -99,5 +104,5 @@ oc delete managedclusters ${MANAGED_CLUSTER_NAME} --wait=false --ignore-not-foun
 
 oc patch managedclusters ${MANAGED_CLUSTER_NAME} -p '{"metadata":{"finalizers":null}}' --type=merge
 
-oc delete secret -n ${MANAGED_CLUSTER_NAME} ${MANAGED_CLUSTER_NAME}-import
+oc delete secret -n ${MANAGED_CLUSTER_NAME} ${MANAGED_CLUSTER_NAME}-import --wait=false --ignore-not-found
 

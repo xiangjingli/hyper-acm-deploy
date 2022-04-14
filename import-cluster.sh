@@ -9,7 +9,7 @@ if [ "$#" -lt 1 ]; then
   exit 0
 fi
 
-while getopts "c:n:m:k:" arg; do
+while getopts "c:n:m:k:f:" arg; do
   case $arg in
     c)
       CLUSTER_NAME="${OPTARG}"
@@ -23,6 +23,9 @@ while getopts "c:n:m:k:" arg; do
     k)
       MANAGED_KUBECONFIG="${OPTARG}"
       ;;
+    f)
+      CONFIG="${OPTARG}"
+      ;;
     :)
       import_cluster_usage
       exit 0
@@ -33,6 +36,23 @@ while getopts "c:n:m:k:" arg; do
       ;;
   esac
 done
+
+cfg_parser ${CONFIG}
+cfg.section.ACM_COMPONENTS
+
+if [ "${APP}" = "true" ]; then
+  install_list="APP"
+fi
+
+if [ "${POLICY}" = "true" ]; then
+  install_list="${install_list} POLICY"
+fi
+
+if [ "${OBSERVABILITY}" = "true" ]; then
+  install_list="${install_list} OBSERVABILITY"
+fi
+
+comment "info" "The following ACM addon components \[ ${install_list} \] will be enabled on the managed cluster ${CLUSTER_NAME}"
 
 comment "info" "1. Validating management cluster status"
 
@@ -95,6 +115,33 @@ export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
 sleep 5
 oc get managedclusters ${MANAGED_CLUSTER_NAME}
 
-comment "info" "8. Enable the app addon on the managed cluster"
+if [ "${APP}" = "true" ]; then
+  comment "info" "8. Enable app addon on the hosted cluster for the managed cluster ${MANAGED_CLUSTER_NAME}"
 
-sed -e "s,\<MANAGED_CLUSTER_NAME\>,${MANAGED_CLUSTER_NAME}," app/hosted/2-app-addon.yaml | oc apply -f -
+  oc apply -f app/hosted/2-app-addon.yaml -n ${MANAGED_CLUSTER_NAME}
+
+  export KUBECONFIG=${MANAGED_KUBECONFIG}
+
+  waitForRes "pods" "application-manager" "open-cluster-management-agent-addon" ""
+fi
+
+if [ "${POLICY}" = "true" ]; then
+  comment "info" "9. Enable policy addon on the hosted cluster for the managed cluster ${MANAGED_CLUSTER_NAME}"
+
+  export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
+
+  oc apply -f policy/hosted/policy-framework-addon.yaml -n ${MANAGED_CLUSTER_NAME}
+  oc apply -f policy/hosted/config-policy-addon.yaml -n ${MANAGED_CLUSTER_NAME}
+
+  export KUBECONFIG=${MANAGED_KUBECONFIG}
+
+  waitForRes "pods" "config-policy-controller" "open-cluster-management-agent-addon" ""
+  waitForRes "pods" "governance-policy-framework" "open-cluster-management-agent-addon" ""
+fi
+
+
+comment "info" "check addon status on the managed cluster"
+
+export KUBECONFIG=${MANAGED_KUBECONFIG}
+
+oc get pods -n open-cluster-management-agent-addon
