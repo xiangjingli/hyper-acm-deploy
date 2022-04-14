@@ -25,7 +25,7 @@ At least three running k8s clusters are required:
 
 ## Create Configuration file acm.conf
 
-Please check the configuration file sample [acm.conf] (acm.conf), where
+Please check the configuration file sample [acm.conf](acm.conf), where
 
 - You can choose which ACM components (App, Policy, Observability) to be installed. The ACM foundation component is always installed by default.
 - You can specify images for each component
@@ -46,10 +46,10 @@ Please check the configuration file sample [acm.conf] (acm.conf), where
 ## Import a managed cluster to the ACM hub
 ```
 % export KUBECONFIG=<management cluster kubeconfig>
-% ./import-cluster.sh -n <Hosted cluster Namespace> -c <Hosted cluster Name> -m <the managed cluster name> -k <the managed cluster kubeconfig>
+% ./import-cluster.sh -f <configuration file name> -n <Hosted cluster Namespace> -c <Hosted cluster Name> -m <the managed cluster name> -k <the managed cluster kubeconfig>
 ```
 ## Detach a managed cluster from the ACM hub
 ```
 % export KUBECONFIG=<management cluster kubeconfig>
-% ./detach-cluster.sh -f <configuration file name> -n <Hosted cluster Namespace> -c <Hosted cluster Name> -m <the managed cluster name> -k <the managed cluster kubeconfig>
+% ./detach-cluster.sh -n <Hosted cluster Namespace> -c <Hosted cluster Name> -m <the managed cluster name> -k <the managed cluster kubeconfig>
 ```
