@@ -52,7 +52,7 @@ if [ "${OBSERVABILITY}" = "true" ]; then
   install_list="${install_list} OBSERVABILITY"
 fi
 
-comment "info" "The following ACM addon components \[ ${install_list} \] will be enabled on the managed cluster ${CLUSTER_NAME}"
+comment "info" "The following ACM addon components [ ${install_list} ] will be enabled on the managed cluster ${CLUSTER_NAME}"
 
 comment "info" "1. Validating management cluster status"
 

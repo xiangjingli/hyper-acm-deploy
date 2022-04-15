@@ -151,25 +151,25 @@ if [ "${APP}" = "true" ]; then
 
 fi
 
-comment "info" "5. Installing ACM Policy component"
-
 if [ "${POLICY}" = "true" ]; then
-  comment "info" "4. Installing ACM App component"
+  comment "info" "5. Installing ACM Policy component"
 
-  comment "info" "4.1 Deploy policy CRDs on hosted cluster"
+  comment "info" "5.1 Deploy policy CRDs on hosted cluster"
 
   export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
   oc apply -f policy/hosted/crds
 
   if [ "${APP}" != "true" ]; then
 
-    comment "info" "4.1.1 Deploy app placementrule CRD on the hosted cluster"
+    comment "info" "5.1.1 Deploy App placementrule CRD on the hosted cluster"
     oc apply -f app/hosted/crds/apps.open-cluster-management.io_placementrules_crd_v1.yaml
 
-    comment "info" "4.1.2 Deploy App placementrule hub component on the management cluster"
+    comment "info" "5.1.2 Deploy App placementrule hub component on the management cluster"
 
     export KUBECONFIG=hub.kubeconfig
-    
+
+    cfg.section.APP_IMAGES
+
     sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/1-service_account.yaml | oc apply -f -
     oc apply -f app/management/2-clusterrole.yaml
     sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/3-clusterrole_binding.yaml | oc apply -f -
@@ -177,7 +177,7 @@ if [ "${POLICY}" = "true" ]; then
     sed -e "s,\<SUBSCRIPTION\>,${SUBSCRIPTION}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/7-application-deployment.yaml | oc apply -f -
   fi
 
-  comment "info" "4.2 Deploy policy hub component on the management cluster"
+  comment "info" "5.2 Deploy Policy hub component on the management cluster"
   export KUBECONFIG=hub.kubeconfig
   oc apply -f policy/management/policy-propagator.yaml -n ${HOSTED_CLUSTER}
   oc apply -f policy/management/policy-addon-controller.yaml -n ${HOSTED_CLUSTER}
