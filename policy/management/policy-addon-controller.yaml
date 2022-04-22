@@ -325,6 +325,7 @@ metadata:
     app: governance-policy-addon-controller
     control-plane: controller-manager
   name: policy-addon-ctrl-controller-manager
+  namespace: <HOSTED_CLUSTER>
 spec:
   replicas: 1
   selector:
@@ -362,7 +363,7 @@ spec:
           value: quay.io/stolostron/governance-policy-status-sync:latest
         - name: GOVERNANCE_POLICY_TEMPLATE_SYNC_IMAGE
           value: quay.io/stolostron/governance-policy-template-sync:latest
-        image: quay.io/stolostron/governance-policy-addon-controller:latest
+        image: <POLICY_ADDON>
         imagePullPolicy: IfNotPresent
         name: manager
         resources:

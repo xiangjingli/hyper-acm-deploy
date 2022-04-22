@@ -244,6 +244,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: governance-policy-propagator
+  namespace: <HOSTED_CLUSTER>
 spec:
   replicas: 1
   selector:
@@ -271,7 +272,7 @@ spec:
               fieldPath: metadata.name
         - name: OPERATOR_NAME
           value: governance-policy-propagator
-        image: quay.io/stolostron/governance-policy-propagator:latest
+        image: <POLICY_PROPAGATOR>
         imagePullPolicy: Always
         name: governance-policy-propagator
         ports:

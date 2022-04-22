@@ -69,8 +69,8 @@ comment "info" "4. Uninstalling ACM Policy component"
 
 export KUBECONFIG=./hub.kubeconfig
 
-oc delete -f policy/management/policy-propagator.yaml -n ${HOSTED_CLUSTER} --ignore-not-found 
-oc delete -f policy/management/policy-addon-controller.yaml -n ${HOSTED_CLUSTER} --ignore-not-found 
+oc delete deployments -n ${HOSTED_CLUSTER} governance-policy-propagator --ignore-not-found 
+oc delete deployments -n ${HOSTED_CLUSTER} policy-addon-ctrl-controller-manager -n ${HOSTED_CLUSTER} --ignore-not-found 
 
 
 comment "info" "5. Uninstalling ACM Observability component"
