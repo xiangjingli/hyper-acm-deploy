@@ -24,7 +24,7 @@ spec:
       labels:
         app: konnectivity-agent-webhook
         hypershift.openshift.io/control-plane-component: konnectivity-agent-webhook
-        hypershift.openshift.io/hosted-control-plane: hypershift-clusters-acm-1
+        hypershift.openshift.io/hosted-control-plane: <HOSTED_CLUSTER>
     spec:
       affinity:
         nodeAffinity:
@@ -41,14 +41,14 @@ spec:
               - key: hypershift.openshift.io/cluster
                 operator: In
                 values:
-                - hypershift-clusters-acm-1
+                - <HOSTED_CLUSTER>
             weight: 100
         podAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
               labelSelector:
                 matchLabels:
-                  hypershift.openshift.io/hosted-control-plane: hypershift-clusters-acm-1
+                  hypershift.openshift.io/hosted-control-plane: <HOSTED_CLUSTER>
               topologyKey: kubernetes.io/hostname
             weight: 100
         podAntiAffinity:
@@ -122,7 +122,7 @@ spec:
       - effect: NoSchedule
         key: hypershift.openshift.io/cluster
         operator: Equal
-        value: hypershift-clusters-acm-1
+        value: <HOSTED_CLUSTER>
       volumes:
       - name: agent-certs
         secret:

@@ -158,3 +158,41 @@ Please check the configuration file sample [acm.conf](acm.conf), where
 % export KUBECONFIG=<management cluster kubeconfig>
 % ./detach-cluster.sh -n <Hosted cluster Namespace> -c <Hosted cluster Name> -m <the managed cluster name> -k <the managed cluster kubeconfig>
 ```
+## Run E2E tests on hosted clusters
+
+### 1. Deploy a guestbook app to the managed cluster
+
+- Deploy the app manifest on the hosted cluster
+```
+% export KUBECONFIG=<hosted cluster kubeconfig>
+% oc apply -f app/hosted/test/test-4-appsub-git-e2e.yaml
+```
+
+- Check the app deployed on the managed cluster
+```
+% export KUBECONFIG=<managed cluster kubeconfig>
+% oc get pods -n test-appsub-4-ns
+NAME                           READY   STATUS    RESTARTS   AGE
+frontend-6c6d6dfd4d-4zctw      1/1     Running   0          3m22s
+frontend-6c6d6dfd4d-6lh82      1/1     Running   0          3m22s
+frontend-6c6d6dfd4d-pjq64      1/1     Running   0          3m22s
+redis-master-f46ff57fd-zgwfp   1/1     Running   0          3m22s
+redis-slave-7979cfdfb8-fvmjn   1/1     Running   0          3m22s
+redis-slave-7979cfdfb8-x6c8j   1/1     Running   0          3m22s
+```
+
+### 2. Deploy a policy to the managed cluster
+
+- Deploy the policy manifest on the hosted cluster
+```
+% export KUBECONFIG=<hosted cluster kubeconfig>
+% oc apply -f policy/hosted/test/test-policy.yaml
+```
+
+- Check the policy deployed on the managed cluster
+```
+% export KUBECONFIG=<managed cluster kubeconfig>
+% oc get policy -A
+NAMESPACE   NAME                 REMEDIATION ACTION   COMPLIANCE STATE   AGE
+cluster1    default.policy-pod   inform               NonCompliant       13s
+```

@@ -4,6 +4,7 @@ metadata:
   labels:
     app: governance-policy-addon-controller
   name: policy-addon-ctrl-controller-manager
+  namespace: <HOSTED_CLUSTER>
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -273,7 +274,7 @@ metadata:
   labels:
     app: governance-policy-addon-controller
   name: policy-addon-ctrl-leader-election-rolebinding
-  namespace: hypershift-clusters-acm-1
+  namespace: <HOSTED_CLUSTER>
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -281,7 +282,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: policy-addon-ctrl-controller-manager
-  namespace: hypershift-clusters-acm-1
+  namespace: <HOSTED_CLUSTER>
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -296,7 +297,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: policy-addon-ctrl-controller-manager
-  namespace: hypershift-clusters-acm-1
+  namespace: <HOSTED_CLUSTER>
 ---
 apiVersion: v1
 data:
