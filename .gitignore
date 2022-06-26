@@ -1,3 +1,4 @@
 *.kubeconfig
 import-crds.yaml
 import.yaml
+.DS_Store

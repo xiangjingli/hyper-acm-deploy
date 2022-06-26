@@ -3,6 +3,12 @@ Deploy ACM components on a Hypershift hosted cluster based on the given configur
 
 ## Prereqs
 At least three running k8s clusters are required:
+- Management cluster
+- Hosted cluster
+- Managed cluster
+
+### Diagram
+![Deploy ACM components on a Hypershift hosted cluster](docs/images/acm-hosted-cluster-diagram.png)
 
 ### A k8s cluster runs as the `management cluster`
 
