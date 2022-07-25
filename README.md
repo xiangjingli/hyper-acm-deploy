@@ -148,6 +148,24 @@ Please check the configuration file sample [acm.conf](acm.conf), where
 % ./hyper-acm-install.sh -f <configuration file name> -n <Hosted cluster Namespace> -c <Hosted cluster Name>
 ```
 
+To verify the selected ACM components are installed on the hypershift hosted cluster namespace
+```
+% oc get pods -n hypershift-clusters-acm-1 --sort-by=.metadata.creationTimestamp 
+...
+hub-registration-controller-779b8ff58f-9tqv6                 1/1     Running   0          8m26s
+managedcluster-import-controller-6c575db789-wxh5q            1/1     Running   0          8m25s
+clustermanager-placement-controller-6d64b8f99d-r5hwq         1/1     Running   0          8m24s
+
+multicluster-operators-channel-7645587776-nclpr              1/1     Running   0          8m17s
+multicluster-operators-hub-subscription-548fc798f6-2zzfn     1/1     Running   0          8m4s
+multicluster-operators-application-7bf8d7c47c-5vsf6          1/1     Running   0          8m3s
+multicluster-operators-subscription-report-b86fb8cbf-wz9qv   1/1     Running   0          8m2s
+konnectivity-agent-webhook-6f64d79fb7-2z4jb                  1/1     Running   0          8m1s
+
+governance-policy-propagator-6d9976cb56-k68zq                1/1     Running   0          7m55s
+policy-addon-ctrl-controller-manager-55f94c96d9-822wp        1/1     Running   0          7m53s
+```
+
 ## Uninstall ACM Hub from a Hypershift hosted cluster
 ```
 % export KUBECONFIG=<management cluster kubeconfig>

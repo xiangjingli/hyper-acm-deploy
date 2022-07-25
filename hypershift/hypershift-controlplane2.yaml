@@ -1,0 +1,47 @@
+apiVersion: hypershift.openshift.io/v1alpha1
+kind: HostedCluster
+metadata:
+  name: acm-2
+  namespace: hypershift-clusters
+spec:
+  controllerAvailabilityPolicy: SingleReplica
+  autoscaling: {}
+  infraID: hyper-acm-2
+  dns:
+    baseDomain: dev02.red-chesterfield.com
+  etcd:
+    managed:
+      storage:
+        persistentVolume:
+          size: 4Gi
+        type: PersistentVolume
+    managementType: Managed
+  fips: false
+  networking:
+    machineCIDR: 10.0.0.0/16
+    networkType: OpenShiftSDN
+    podCIDR: 10.132.0.0/14
+    serviceCIDR: 172.31.0.0/16
+  platform:
+    type: None
+  pullSecret:
+    name: pull-secret
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:4.10.14-x86_64
+  sshKey: {}
+  services:
+  - service: APIServer
+    servicePublishingStrategy:
+      type: LoadBalancer
+  - service: OAuthServer
+    servicePublishingStrategy:
+      type: Route
+  - service: OIDC
+    servicePublishingStrategy:
+      type: Route
+  - service: Konnectivity
+    servicePublishingStrategy:
+      type: LoadBalancer
+  - service: Ignition
+    servicePublishingStrategy:
+      type: Route
