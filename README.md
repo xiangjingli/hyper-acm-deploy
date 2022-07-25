@@ -8,7 +8,7 @@ At least three running k8s clusters are required:
 - Managed cluster
 
 ### Diagram
-![Deploy ACM components on a Hypershift hosted cluster](docs/images/acm-hosted-cluster-diagram.pdf)
+![Deploy ACM components on a Hypershift hosted cluster](docs/images/acm-hosted-cluster-diagram.svg)
 
 ### A k8s cluster runs as the `management cluster`
 
