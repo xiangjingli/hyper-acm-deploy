@@ -1,14 +1,14 @@
 # hyper-acm-deploy
-Deploy ACM components on a Hypershift hosted cluster based on the given configuration file.
+Customize ACM components on a Hypershift hosted cluster with zero worker node based on the given configuration file.
 
 ## Prereqs
 At least three running k8s clusters are required:
 - Management cluster
-- Hosted cluster
+- Hosted cluster with zero worker node provisioned by Hypershift
 - Managed cluster
 
 ### Diagram
-![Deploy ACM components on a Hypershift hosted cluster](docs/images/acm-hosted-cluster-diagram.png)
+![Deploy ACM components on a Hypershift hosted cluster](docs/images/acm-hosted-cluster-diagram.pdf)
 
 ### A k8s cluster runs as the `management cluster`
 
@@ -34,7 +34,7 @@ Error: failed to initialize admission: couldn't init admission plugin "PodSecuri
 
 2. Install the hypershift operator. By default, it is installed on the `hypershift` NS. Make sure the hypershift operator running
 ```
-% ./bin/hypershift install
+% ./bin/hypershift install --hypershift-image quay.io/hypershift/hypershift-operator:4.10
 % oc get pods -n hypershift
 NAME                        READY   STATUS    RESTARTS   AGE
 operator-567b4b469b-shw59   1/1     Running   0          66s
