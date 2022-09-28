@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ./helpers.sh
+source ./bash-ini-parser
 
 check_dependency
 
@@ -38,7 +39,7 @@ while getopts "c:n:m:k:f:" arg; do
 done
 
 cfg_parser ${CONFIG}
-cfg.section.ACM_COMPONENTS
+cfg_writer
 
 if [ "${APP}" = "true" ]; then
   install_list="APP"

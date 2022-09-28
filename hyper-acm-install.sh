@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ./helpers.sh
+source ./bash-ini-parser
 
 check_dependency
 
@@ -31,9 +32,8 @@ while getopts "c:f:n:" arg; do
   esac
 done
 
-
 cfg_parser ${CONFIG}
-cfg.section.ACM_COMPONENTS
+cfg_writer
 
 if [ "${APP}" = "true" ]; then
   install_list="APP"
@@ -97,8 +97,6 @@ comment "info" "3.4 Applying foundation components on the management cluster"
 
 export KUBECONFIG=./hub.kubeconfig
 
-cfg.section.FOUNDATION_IMAGES
-
 sed -e "s,\<HUB_REGISTRATION\>,${HUB_REGISTRATION}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," foundation/management/01-hub-registration-deployment.yaml | oc apply -f -
 
 sed -e "s,\<MANAGED_CLUSTER_IMPORT\>,${MANAGED_CLUSTER_IMPORT},"  -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," -e "s,\<HUB_REGISTRATION\>,${HUB_REGISTRATION}," -e "s,\<REGISTRATION_OPERATOR\>,${REGISTRATION_OPERATOR}," -e "s,\<MANIFEST_WORK\>,${MANIFEST_WORK}," foundation/management/02-managed-cluster-import-deployment.yaml | oc apply -f -
@@ -116,8 +114,6 @@ if [ "${APP}" = "true" ]; then
   comment "info" "4.2 Applying App components on the management cluster"
 
   export KUBECONFIG=./hub.kubeconfig
-
-  cfg.section.APP_IMAGES
 
   sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/1-service_account.yaml | oc apply -f -
   oc apply -f app/management/2-clusterrole.yaml
@@ -168,8 +164,6 @@ if [ "${POLICY}" = "true" ]; then
 
     export KUBECONFIG=hub.kubeconfig
 
-    cfg.section.APP_IMAGES
-
     sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/1-service_account.yaml | oc apply -f -
     oc apply -f app/management/2-clusterrole.yaml
     sed -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," app/management/3-clusterrole_binding.yaml | oc apply -f -
@@ -179,8 +173,6 @@ if [ "${POLICY}" = "true" ]; then
 
   comment "info" "5.2 Deploy Policy hub component on the management cluster"
   export KUBECONFIG=hub.kubeconfig
-
-  cfg.section.POLICY_IMAGES
 
   sed -e "s,\<POLICY_PROPAGATOR\>,${POLICY_PROPAGATOR}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," policy/management/policy-propagator.yaml | oc apply -f -
   sed -e "s,\<POLICY_ADDON\>,${POLICY_ADDON}," -e "s,\<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," policy/management/policy-addon-controller.yaml | oc apply -f -
