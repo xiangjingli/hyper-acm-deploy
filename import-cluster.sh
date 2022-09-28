@@ -93,7 +93,7 @@ comment "info" "4. Create the managed cluster on the hosted cluster"
 
 export KUBECONFIG=${HOSTED_CLUSTER_KUBECONFIG}.kubeconfig
 
-sed -e "s,\<MANAGED_CLUSTER_NAME\>,${MANAGED_CLUSTER_NAME}," foundation/hosted/01-managedcluster.yaml | oc apply -f -
+sed -e "s,<MANAGED_CLUSTER_NAME>,${MANAGED_CLUSTER_NAME}," foundation/hosted/01-managedcluster.yaml | oc apply -f -
 
 RUN_CMD="oc get secrets -n ${MANAGED_CLUSTER_NAME} ${MANAGED_CLUSTER_NAME}-import"
 WAIT_MSG="The managed cluster import secret is not ready"
