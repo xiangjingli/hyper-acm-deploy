@@ -180,8 +180,8 @@ if [ "${POLICY}" = "true" ]; then
   comment "info" "5.2 Deploy Policy hub component on the management cluster"
   export KUBECONFIG=hub.kubeconfig
 
-  sed -e "s,<POLICY_PROPAGATOR\>,${POLICY_PROPAGATOR}," -e "s,<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," policy/management/policy-propagator.yaml | oc apply -f -
-  sed -e "s,<POLICY_ADDON\>,${POLICY_ADDON}," -e "s,<HOSTED_CLUSTER\>,${HOSTED_CLUSTER}," policy/management/policy-addon-controller.yaml | oc apply -f -
+  sed -e "s,<POLICY_PROPAGATOR>,${POLICY_PROPAGATOR}," -e "s,<HOSTED_CLUSTER>,${HOSTED_CLUSTER}," policy/management/policy-propagator.yaml | oc apply -f -
+  sed -e "s,<POLICY_ADDON>,${POLICY_ADDON}," -e "s,<HOSTED_CLUSTER>,${HOSTED_CLUSTER}," policy/management/policy-addon-controller.yaml | oc apply -f -
 fi
 
 
