@@ -35,6 +35,12 @@ done
 cfg_parser ${CONFIG}
 cfg_writer
 
+cfg.section.ACM_COMPONENTS
+cfg.section.FOUNDATION_IMAGES
+cfg.section.APP_IMAGES
+cfg.section.POLICY_IMAGES
+
+
 if [ "${APP}" = "true" ]; then
   install_list="APP"
 fi

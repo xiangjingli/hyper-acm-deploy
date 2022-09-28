@@ -41,6 +41,8 @@ done
 cfg_parser ${CONFIG}
 cfg_writer
 
+cfg.section.ACM_COMPONENTS
+
 if [ "${APP}" = "true" ]; then
   install_list="APP"
 fi
